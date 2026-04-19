@@ -311,11 +311,15 @@
     elFeedback.textContent = "";
     elFeedback.className = "feedback";
     elAnswer.value = "";
-    elAnswer.disabled = false;
     elAnswer.focus();
     state.questionStartedAt = performance.now();
     state.busy = false;
   }
+
+  // Prevent the "Sprawdź" button from stealing focus on tap — keeps the mobile
+  // keyboard visible across submits, no layout jump.
+  const elSubmitBtn = document.querySelector('#answer-form button[type="submit"]');
+  elSubmitBtn.addEventListener("mousedown", (e) => e.preventDefault());
 
   $("#answer-form").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -329,7 +333,6 @@
     const ms = performance.now() - state.questionStartedAt;
     state.answers.push({ q, given, correct, ms });
     state.busy = true;
-    elAnswer.disabled = true;
 
     if (correct) {
       elQuestion.classList.add("ok");
