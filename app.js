@@ -120,12 +120,22 @@
     localStorage.setItem(LS_SETTINGS, JSON.stringify(s));
   }
 
+  function isValidHistoryEntry(h) {
+    return h && typeof h === "object"
+      && Number.isFinite(h.when)
+      && Number.isFinite(h.score)
+      && Number.isFinite(h.total)
+      && Number.isFinite(h.totalMs)
+      && typeof h.typ === "string";
+  }
+
   function loadHistory() {
     try {
       const raw = localStorage.getItem(LS_HISTORY);
       if (!raw) return [];
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter(isValidHistoryEntry);
     } catch {
       return [];
     }
@@ -144,13 +154,22 @@
   const state = {
     settings: loadSettings(),
     session: null,
+    sessionId: 0,
     idx: 0,
     answers: [], // { q, given, correct, ms }
     startedAt: 0,
     questionStartedAt: 0,
     timerHandle: null,
+    feedbackHandle: null,
     busy: false,
   };
+
+  function clearFeedbackTimer() {
+    if (state.feedbackHandle !== null) {
+      clearTimeout(state.feedbackHandle);
+      state.feedbackHandle = null;
+    }
+  }
 
   const $ = (sel) => document.querySelector(sel);
 
@@ -220,15 +239,19 @@
 
   function renderHistory() {
     const ul = $("#history-list");
-    ul.innerHTML = "";
+    ul.replaceChildren();
     const items = loadHistory();
     for (const h of items) {
       const li = document.createElement("li");
       const when = new Date(h.when);
       const date = when.toLocaleDateString("pl-PL");
       const time = when.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" });
-      li.innerHTML = `<strong>${h.score} / ${h.total}</strong>` +
-        ` <span class="meta">${date} ${time} · ${(h.totalMs / 1000).toFixed(0)} s · ${h.typ}</span>`;
+      const strong = document.createElement("strong");
+      strong.textContent = `${h.score} / ${h.total}`;
+      const meta = document.createElement("span");
+      meta.className = "meta";
+      meta.textContent = ` ${date} ${time} · ${(h.totalMs / 1000).toFixed(0)} s · ${h.typ}`;
+      li.append(strong, meta);
       ul.appendChild(li);
     }
   }
@@ -248,6 +271,8 @@
       alert(e.message);
       return;
     }
+    clearFeedbackTimer();
+    state.sessionId++;
     state.idx = 0;
     state.answers = [];
     state.startedAt = performance.now();
@@ -309,7 +334,11 @@
       elFeedback.className = "feedback bad";
     }
 
-    setTimeout(() => {
+    const mySessionId = state.sessionId;
+    clearFeedbackTimer();
+    state.feedbackHandle = setTimeout(() => {
+      state.feedbackHandle = null;
+      if (state.sessionId !== mySessionId) return; // aborted or restarted — drop stale callback
       state.idx++;
       if (state.idx >= state.session.length) {
         finishSession();
@@ -321,6 +350,8 @@
 
   $("#btn-abort").addEventListener("click", () => {
     if (!confirm("Przerwac sesje? Wynik nie zostanie zapisany.")) return;
+    clearFeedbackTimer();
+    state.sessionId++; // invalidate any in-flight timeout callback
     stopTimerTick();
     showView("start");
     renderHistory();
@@ -345,15 +376,24 @@
     const mistakes = state.answers.filter(a => !a.correct);
     const mSection = $("#mistakes-section");
     const mList = $("#mistakes");
-    mList.innerHTML = "";
+    mList.replaceChildren();
     if (mistakes.length) {
       mSection.hidden = false;
       for (const m of mistakes) {
         const li = document.createElement("li");
-        li.innerHTML =
-          `<span class="q">${m.q.text.replace(" = ?", "")}</span>` +
-          `<span><span class="given">${m.given}</span> → ` +
-          `<span class="correct">${m.q.answer}</span></span>`;
+        const q = document.createElement("span");
+        q.className = "q";
+        q.textContent = m.q.text.replace(" = ?", "");
+        const rhs = document.createElement("span");
+        const given = document.createElement("span");
+        given.className = "given";
+        given.textContent = String(m.given);
+        const sep = document.createTextNode(" → ");
+        const correct = document.createElement("span");
+        correct.className = "correct";
+        correct.textContent = String(m.q.answer);
+        rhs.append(given, sep, correct);
+        li.append(q, rhs);
         mList.appendChild(li);
       }
     } else {
