@@ -33,7 +33,11 @@ body {
 .app {
   width: 100%;
   max-width: 640px;
-  padding: 24px 20px 60px;
+  padding:
+    calc(24px + env(safe-area-inset-top, 0px))
+    calc(20px + env(safe-area-inset-right, 0px))
+    calc(60px + env(safe-area-inset-bottom, 0px))
+    calc(20px + env(safe-area-inset-left, 0px));
 }
 
 .view {
@@ -163,7 +167,7 @@ details#settings-panel summary {
   box-shadow: var(--shadow);
 }
 .history:empty::before {
-  content: "Brak historii. Zagraj pierwsza sesje.";
+  content: "Brak historii. Zagraj pierwszą sesję.";
   display: block;
   color: var(--muted);
   font-style: italic;
@@ -279,10 +283,22 @@ details#settings-panel summary {
 .result-actions .primary { flex: 1; min-width: 160px; padding: 16px; font-size: 1.15rem; }
 
 /* Mobile */
-@media (max-width: 420px) {
-  .question { font-size: 2.3rem; padding: 30px 14px; }
-  .answer-form input { font-size: 1.3rem; padding: 14px; }
+@media (max-width: 480px) {
   h1 { font-size: 1.6rem; }
-  .result-summary span { font-size: 1.3rem; }
+  .question { font-size: 2.3rem; padding: 30px 14px; }
+
+  .answer-form { flex-direction: column; gap: 12px; }
+  .answer-form input { font-size: 1.4rem; padding: 16px; }
+  .answer-form .primary {
+    width: 100%;
+    padding: 18px;
+    font-size: 1.25rem;
+  }
+
+  .result-summary { grid-template-columns: 1fr; gap: 14px; }
+  .result-summary span { font-size: 1.5rem; }
   .settings-grid { grid-template-columns: 1fr; }
+  .result-actions { flex-direction: column; }
+  .result-actions .primary,
+  .result-actions .ghost { width: 100%; }
 }

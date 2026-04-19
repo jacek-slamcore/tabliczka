@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Quiz</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -20,13 +20,13 @@
       <details id="settings-panel">
         <summary>Parametry sesji</summary>
         <form id="settings-form" class="settings-grid">
-          <label>Liczba zadan
+          <label>Liczba zadań
             <input type="number" name="liczbaZadan" min="5" max="100" required>
           </label>
           <label>Typ
             <select name="typ">
-              <option value="mix">Mix mnozenie + dzielenie</option>
-              <option value="mnozenie">Tylko mnozenie</option>
+              <option value="mix">Mix mnożenie + dzielenie</option>
+              <option value="mnozenie">Tylko mnożenie</option>
               <option value="dzielenie">Tylko dzielenie</option>
             </select>
           </label>
@@ -44,11 +44,11 @@
           </label>
           <label class="checkbox">
             <input type="checkbox" name="wykluczTrywialne">
-            <span>Wyklucz trywialne (x0, x1, x10, oba czynniki &lt; 4)</span>
+            <span>Wyklucz trywialne (×0, ×1, ×10, oba czynniki &lt; 4)</span>
           </label>
           <div class="form-actions">
             <button type="submit" class="primary">Zapisz</button>
-            <button type="button" id="btn-reset-settings" class="ghost">Domyslne</button>
+            <button type="button" id="btn-reset-settings" class="ghost">Domyślne</button>
           </div>
         </form>
       </details>
@@ -76,7 +76,7 @@
           required
           autofocus
         >
-        <button type="submit" class="primary">Sprawdz</button>
+        <button type="submit" class="primary">Sprawdź</button>
       </form>
 
       <div id="feedback" class="feedback" aria-live="polite"></div>
@@ -88,12 +88,12 @@
       <h1 id="results-headline">Wynik</h1>
       <div class="result-summary">
         <div><span id="score">0 / 0</span><small>poprawnie</small></div>
-        <div><span id="total-time">0 s</span><small>czas calkowity</small></div>
-        <div><span id="avg-time">0.0 s</span><small>srednio na pytanie</small></div>
+        <div><span id="total-time">0 s</span><small>czas całkowity</small></div>
+        <div><span id="avg-time">0.0 s</span><small>średnio na pytanie</small></div>
       </div>
 
       <section id="mistakes-section" hidden>
-        <h2>Bledy</h2>
+        <h2>Błędy</h2>
         <ol id="mistakes" class="mistakes"></ol>
       </section>
 

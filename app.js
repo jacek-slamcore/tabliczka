@@ -74,7 +74,7 @@
   function generateSession(settings) {
     const pairs = validPairs(settings);
     if (pairs.length === 0) {
-      throw new Error("Brak pytan spelniajacych parametry. Poszerz zakres.");
+      throw new Error("Brak pytań spełniających parametry. Poszerz zakres.");
     }
     const n = Math.max(1, Math.floor(settings.liczbaZadan));
     const want = [];
@@ -237,6 +237,12 @@
 
   // ---- History render -------------------------------------------------------
 
+  const TYP_LABEL = {
+    mix: "mix",
+    mnozenie: "mnożenie",
+    dzielenie: "dzielenie",
+  };
+
   function renderHistory() {
     const ul = $("#history-list");
     ul.replaceChildren();
@@ -246,11 +252,12 @@
       const when = new Date(h.when);
       const date = when.toLocaleDateString("pl-PL");
       const time = when.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" });
+      const label = TYP_LABEL[h.typ] || h.typ;
       const strong = document.createElement("strong");
       strong.textContent = `${h.score} / ${h.total}`;
       const meta = document.createElement("span");
       meta.className = "meta";
-      meta.textContent = ` ${date} ${time} · ${(h.totalMs / 1000).toFixed(0)} s · ${h.typ}`;
+      meta.textContent = ` ${date} ${time} · ${(h.totalMs / 1000).toFixed(0)} s · ${label}`;
       li.append(strong, meta);
       ul.appendChild(li);
     }
@@ -330,7 +337,7 @@
       elFeedback.className = "feedback ok";
     } else {
       elQuestion.classList.add("bad");
-      elFeedback.textContent = `Zle. Poprawna: ${q.answer}`;
+      elFeedback.textContent = `Źle. Poprawna: ${q.answer}`;
       elFeedback.className = "feedback bad";
     }
 
@@ -349,7 +356,7 @@
   });
 
   $("#btn-abort").addEventListener("click", () => {
-    if (!confirm("Przerwac sesje? Wynik nie zostanie zapisany.")) return;
+    if (!confirm("Przerwać sesję? Wynik nie zostanie zapisany.")) return;
     clearFeedbackTimer();
     state.sessionId++; // invalidate any in-flight timeout callback
     stopTimerTick();
@@ -369,9 +376,9 @@
     $("#avg-time").textContent = `${(avg / 1000).toFixed(1)} s`;
     $("#results-headline").textContent =
       score === total ? "Perfekcyjnie!" :
-      score >= total * 0.8 ? "Swietnie!" :
+      score >= total * 0.8 ? "Świetnie!" :
       score >= total * 0.5 ? "Dobry wynik" :
-      "Jeszcze troche wprawy";
+      "Jeszcze trochę wprawy";
 
     const mistakes = state.answers.filter(a => !a.correct);
     const mSection = $("#mistakes-section");
