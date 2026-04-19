@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quiz</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <section id="view-start" class="view">
+      <h1>Quiz</h1>
+      <p class="lead">Cześć Ignacy, Twój tata przygotował mały quiz dla Ciebie.</p>
+
+      <div class="start-actions">
+        <button id="btn-start" class="primary">Start</button>
+        <button id="btn-toggle-settings" class="ghost">Ustawienia</button>
+      </div>
+
+      <details id="settings-panel">
+        <summary>Parametry sesji</summary>
+        <form id="settings-form" class="settings-grid">
+          <label>Liczba zadan
+            <input type="number" name="liczbaZadan" min="5" max="100" required>
+          </label>
+          <label>Typ
+            <select name="typ">
+              <option value="mix">Mix mnozenie + dzielenie</option>
+              <option value="mnozenie">Tylko mnozenie</option>
+              <option value="dzielenie">Tylko dzielenie</option>
+            </select>
+          </label>
+          <label>Czynnik min
+            <input type="number" name="czynnikMin" min="2" max="99" required>
+          </label>
+          <label>Czynnik max
+            <input type="number" name="czynnikMax" min="2" max="99" required>
+          </label>
+          <label>Iloczyn min
+            <input type="number" name="iloczynMin" min="0" max="9999" required>
+          </label>
+          <label>Iloczyn max
+            <input type="number" name="iloczynMax" min="1" max="9999" required>
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" name="wykluczTrywialne">
+            <span>Wyklucz trywialne (x0, x1, x10, oba czynniki &lt; 4)</span>
+          </label>
+          <div class="form-actions">
+            <button type="submit" class="primary">Zapisz</button>
+            <button type="button" id="btn-reset-settings" class="ghost">Domyslne</button>
+          </div>
+        </form>
+      </details>
+
+      <section id="history-panel">
+        <h2>Ostatnie wyniki</h2>
+        <ol id="history-list" class="history"></ol>
+      </section>
+    </section>
+
+    <section id="view-quiz" class="view" hidden>
+      <div class="quiz-header">
+        <span id="progress" class="progress">0 / 0</span>
+        <span id="session-timer" class="timer">0.0 s</span>
+      </div>
+
+      <div id="question" class="question">—</div>
+
+      <form id="answer-form" class="answer-form" autocomplete="off">
+        <input
+          id="answer"
+          type="number"
+          inputmode="numeric"
+          step="1"
+          required
+          autofocus
+        >
+        <button type="submit" class="primary">Sprawdz</button>
+      </form>
+
+      <div id="feedback" class="feedback" aria-live="polite"></div>
+
+      <button id="btn-abort" class="ghost small">Przerwij</button>
+    </section>
+
+    <section id="view-results" class="view" hidden>
+      <h1 id="results-headline">Wynik</h1>
+      <div class="result-summary">
+        <div><span id="score">0 / 0</span><small>poprawnie</small></div>
+        <div><span id="total-time">0 s</span><small>czas calkowity</small></div>
+        <div><span id="avg-time">0.0 s</span><small>srednio na pytanie</small></div>
+      </div>
+
+      <section id="mistakes-section" hidden>
+        <h2>Bledy</h2>
+        <ol id="mistakes" class="mistakes"></ol>
+      </section>
+
+      <div class="result-actions">
+        <button id="btn-again" class="primary">Jeszcze raz</button>
+        <button id="btn-home" class="ghost">Nowa sesja</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
