@@ -316,13 +316,14 @@
     state.busy = false;
   }
 
-  // Prevent the "Sprawdź" button from stealing focus on tap — keeps the mobile
-  // keyboard visible across submits, no layout jump.
-  const elSubmitBtn = document.querySelector('#answer-form button[type="submit"]');
+  // No <form> submit path: iOS Safari blurs the input before submit, which
+  // hides the soft keyboard for ~900ms. We bind Enter directly + button click.
+  const elSubmitBtn = document.querySelector('#answer-form button.primary');
+
+  // mousedown preventDefault: tap on the button must not steal focus.
   elSubmitBtn.addEventListener("mousedown", (e) => e.preventDefault());
 
-  $("#answer-form").addEventListener("submit", (e) => {
-    e.preventDefault();
+  function handleAnswer() {
     if (state.busy) return;
     const raw = elAnswer.value.trim();
     if (raw === "") return;
@@ -344,11 +345,16 @@
       elFeedback.className = "feedback bad";
     }
 
+    // Re-assert focus synchronously, belt-and-braces: if anything tried to
+    // blur the input, force focus back while we're still in the user-gesture
+    // stack (the only time iOS will actually keep the keyboard open).
+    elAnswer.focus();
+
     const mySessionId = state.sessionId;
     clearFeedbackTimer();
     state.feedbackHandle = setTimeout(() => {
       state.feedbackHandle = null;
-      if (state.sessionId !== mySessionId) return; // aborted or restarted — drop stale callback
+      if (state.sessionId !== mySessionId) return; // aborted or restarted
       state.idx++;
       if (state.idx >= state.session.length) {
         finishSession();
@@ -356,6 +362,26 @@
         renderQuestion();
       }
     }, FEEDBACK_MS);
+  }
+
+  // Enter on the input: handle inline, no form submit => no iOS blur.
+  elAnswer.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAnswer();
+    }
+  });
+
+  // Button tap: prevent any default activation of form submit.
+  elSubmitBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    handleAnswer();
+  });
+
+  // Absolute safety net: if anything else ever triggers form submit, swallow.
+  $("#answer-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    handleAnswer();
   });
 
   $("#btn-abort").addEventListener("click", () => {
