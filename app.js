@@ -402,6 +402,9 @@
   });
 
   function finishSession() {
+    // Koniec sesji — chowamy klawiature na mobile i oddajemy focus naglowkowi
+    // wynikow, zeby Ignacy widzial cale podsumowanie bez zaslony.
+    elAnswer.blur();
     stopTimerTick();
     const totalMs = performance.now() - state.startedAt;
     const total = state.session.length;
@@ -451,6 +454,8 @@
     });
 
     showView("results");
+    window.scrollTo({ top: 0 });
+    $("#results-headline").focus({ preventScroll: true });
   }
 
   $("#btn-again").addEventListener("click", () => { startSession(); });
