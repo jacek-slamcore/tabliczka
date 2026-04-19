@@ -320,12 +320,17 @@
   // hides the soft keyboard for ~900ms. We bind Enter directly + button click.
   const elSubmitBtn = document.querySelector('#answer-form button.primary');
 
-  // Tap must not steal focus from the input. On iOS `mousedown` is enough;
-  // on Android Chrome touch focus is driven by `pointerdown`, so both handlers
-  // are needed. preventDefault here blocks focus shift without cancelling the
-  // subsequent click event.
+  // Tap must not steal focus from the input. On iOS `mousedown` preventDefault
+  // is enough. On Android Chrome touch focus is driven by `pointerdown`, and
+  // there preventDefault can also swallow the synthetic click — so we handle
+  // the answer straight from pointerdown, and rely on click only as a fallback
+  // (state.busy deduplicates).
   elSubmitBtn.addEventListener("mousedown", (e) => e.preventDefault());
-  elSubmitBtn.addEventListener("pointerdown", (e) => e.preventDefault());
+  elSubmitBtn.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse") return; // desktop: let mousedown+click flow
+    e.preventDefault();
+    handleAnswer();
+  });
 
   function handleAnswer() {
     // Re-assert focus FIRST, in the same user-gesture tick. If a tap on the
