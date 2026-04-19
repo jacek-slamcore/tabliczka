@@ -320,10 +320,18 @@
   // hides the soft keyboard for ~900ms. We bind Enter directly + button click.
   const elSubmitBtn = document.querySelector('#answer-form button.primary');
 
-  // mousedown preventDefault: tap on the button must not steal focus.
+  // Tap must not steal focus from the input. On iOS `mousedown` is enough;
+  // on Android Chrome touch focus is driven by `pointerdown`, so both handlers
+  // are needed. preventDefault here blocks focus shift without cancelling the
+  // subsequent click event.
   elSubmitBtn.addEventListener("mousedown", (e) => e.preventDefault());
+  elSubmitBtn.addEventListener("pointerdown", (e) => e.preventDefault());
 
   function handleAnswer() {
+    // Re-assert focus FIRST, in the same user-gesture tick. If a tap on the
+    // button still managed to shift focus, we yank it back before any DOM
+    // change so the soft keyboard never has a reason to close.
+    elAnswer.focus();
     if (state.busy) return;
     const raw = elAnswer.value.trim();
     if (raw === "") return;
@@ -344,11 +352,6 @@
       elFeedback.textContent = `Źle. Poprawna: ${q.answer}`;
       elFeedback.className = "feedback bad";
     }
-
-    // Re-assert focus synchronously, belt-and-braces: if anything tried to
-    // blur the input, force focus back while we're still in the user-gesture
-    // stack (the only time iOS will actually keep the keyboard open).
-    elAnswer.focus();
 
     const mySessionId = state.sessionId;
     clearFeedbackTimer();
